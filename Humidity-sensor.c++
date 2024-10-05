@@ -1,18 +1,22 @@
 #include <ESP8266WiFi.h>
 #include <FirebaseESP8266.h>
+#include <DHT.h>
 
-String data;
+#define DHTPIN 2        
+#define DHTTYPE DHT11   
+DHT dht(DHTPIN, DHTTYPE);
+
 FirebaseConfig config;
 FirebaseAuth auth;
 
-const char* ssid = ""; 
-const char* password = ""; 
-
+const char* ssid = "RAMIREZ_2G"; 
+const char* password = "ram12345"; 
 
 FirebaseData firebaseData;
 
 void setup() {
   Serial.begin(115200);
+  dht.begin();  
 
   WiFi.begin(ssid, password);
   Serial.print("Connecting to Wi-Fi");
@@ -23,7 +27,6 @@ void setup() {
   Serial.println();
   Serial.println("Connected to Wi-Fi");
   Serial.println(WiFi.localIP());
-
 
   config.host = "arduinotofirebase-d65c5-default-rtdb.firebaseio.com/"; 
   config.api_key = "AIzaSyAunMT08LY13RUJLt7eL9cxAJTsUK4BF_c"; 
@@ -44,16 +47,32 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("Sending Data");
+  float temp = dht.readTemperature();  
+  float humidity = dht.readHumidity();
+  
+  if (isnan(temp) || isnan(humidity)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
 
-  data = "Connected"; 
+  
+  String uniqueKey = String(millis()); 
 
- 
-  if (Firebase.setString(firebaseData, "/random/option1", data)) {
+
+  String tempPath = "/sensor/temperature/" + uniqueKey; 
+  String humidityPath = "/sensor/humidity/" + uniqueKey;
+
+  if (Firebase.setFloat(firebaseData, tempPath, temp) &&
+      Firebase.setFloat(firebaseData, humidityPath, humidity)) {
     Serial.println("Data successfully sent to Firebase.");
+    Serial.print("Temperature: ");
+    Serial.println(temp);
+    Serial.print("Humidity: ");
+    Serial.println(humidity);
   } else {
-    Serial.println("Failed to send Data");
+    Serial.println("Failed to send data");
     Serial.println(firebaseData.errorReason());
   }
-  delay(10000); 
+
+  delay(10000);  
 }
