@@ -85,13 +85,13 @@ void loop() {
   String humidityPath = "/sensor/humidity/" + uniqueKey;
   String distancePath = "/sensor/distance/" + uniqueKey;
   String lightPath = "/sensor/light/" + uniqueKey;  // Path for light level
-  String irPath = "/sensor/infrared/" + uniqueKey;  // Path for IR sensor data
+  String irPath = "/sensor/infrared/" + uniqueKey;
 
   if (Firebase.setFloat(firebaseData, tempPath, temp) &&
       Firebase.setFloat(firebaseData, humidityPath, humidity) &&
       Firebase.setFloat(firebaseData, distancePath, distance) &&
       Firebase.setInt(firebaseData, lightPath, lightLevel) &&
-      Firebase.setInt(firebaseData, irPath, irValue)) { // Sending IR sensor data
+      Firebase.setInt(firebaseData, irPath, irValue)) { 
     Serial.println("Data successfully sent to Firebase.");
     Serial.print("Temperature: ");
     Serial.println(temp);
