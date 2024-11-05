@@ -53,7 +53,6 @@ def is_index_finger_up_and_button_pressed(hand_landmarks, button_rect):
 cap = cv2.VideoCapture(0)
 
 # Button properties
-button_x, button_y = 300, 400  # Position of the button
 button_w, button_h = 100, 50    # Size of the button
 button_color = (0, 255, 0)       # Button color (green)
 button_pressed_color = (0, 0, 255)  # Color when button is pressed
@@ -63,17 +62,20 @@ while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
-    
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    face_results = face_detection.process(rgb_frame)
-    hand_results = hands.process(rgb_frame)
 
-    # Draw button in the center of the frame
+    # Resize frame to full screen
     frame_height, frame_width, _ = frame.shape
+    screen_res = (frame_width, frame_height)
+    
+    # Draw button in the center of the frame
     button_x = (frame_width - button_w) // 2
     button_y = (frame_height - button_h) // 2
     cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_color, -1)
     cv2.putText(frame, "Click Me", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_results = face_detection.process(rgb_frame)
+    hand_results = hands.process(rgb_frame)
 
     if face_results.detections:
         for detection in face_results.detections:
@@ -99,16 +101,21 @@ while cap.isOpened():
             fingers_count = count_fingers(hand_landmarks)
             cv2.putText(frame, f'Fingers Count: {fingers_count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
+            # Check if index finger is up and overlaps with button
             if is_index_finger_up_and_button_pressed(hand_landmarks, (button_x, button_y, button_w, button_h)):
                 cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_pressed_color, -1)
                 cv2.putText(frame, "Clicked!", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                # Output the value "ILOVEYOU"
                 cv2.putText(frame, "ILOVEYOU", (frame_width // 2 - 50, frame_height // 2), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3)
                 print("ILOVEYOU")
 
+    # Display the frame with detections
     cv2.imshow("Face and Palm Detection with Button", frame)
 
+    # Exit on ESC key
     if cv2.waitKey(1) & 0xFF == 27:
         break
 
+# Release the capture
 cap.release()
 cv2.destroyAllWindows()
