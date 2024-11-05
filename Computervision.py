@@ -36,14 +36,14 @@ def count_fingers(hand_landmarks):
     return sum(fingers_up)
 
 # Function to check if the index finger is up and if it overlaps with the button
-def is_index_finger_up_and_button_pressed(hand_landmarks, button_rect):
+def is_index_finger_up_and_button_pressed(hand_landmarks, button_rect, frame_height, frame_width):
     landmarks = hand_landmarks.landmark
     index_finger_up = (landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y < landmarks[mp_hands.HandLandmark.INDEX_FINGER_DIP].y)
-    
+
     # Get button coordinates
-    ix = int(landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * frame.shape[1])
-    iy = int(landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * frame.shape[0])
-    
+    ix = int(landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * frame_width)
+    iy = int(landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * frame_height)
+
     # Check if the index finger is above the button and within the button boundaries
     if index_finger_up and button_rect[0] < ix < button_rect[0] + button_rect[2] and button_rect[1] < iy < button_rect[1] + button_rect[3]:
         return True
@@ -53,9 +53,9 @@ def is_index_finger_up_and_button_pressed(hand_landmarks, button_rect):
 cap = cv2.VideoCapture(0)
 
 # Button properties
-button_w, button_h = 100, 50    # Size of the button
-button_color = (0, 255, 0)       # Button color (green)
-button_pressed_color = (0, 0, 255)  # Color when button is pressed
+button_w, button_h = 150, 60    # Size of the button
+button_color = (50, 150, 50)       # Button color (dark green)
+button_pressed_color = (0, 100, 200)  # Color when button is pressed (dark blue)
 
 # Main loop
 while cap.isOpened():
@@ -70,7 +70,22 @@ while cap.isOpened():
     button_x = (frame_width - button_w) // 2
     button_y = (frame_height - button_h) // 2
     cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_color, -1)
-    cv2.putText(frame, "Click Me", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    
+    # Draw button border
+    cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), (0, 0, 0), 2)  # Black border
+    
+    # Button text properties
+    button_text = "Click Me"
+    font_scale = 0.7
+    text_color = (255, 255, 255)  # White text
+    text_thickness = 2
+    
+    # Get text size for centering
+    text_size = cv2.getTextSize(button_text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_thickness)[0]
+    text_x = button_x + (button_w - text_size[0]) // 2
+    text_y = button_y + (button_h + text_size[1]) // 2
+    
+    cv2.putText(frame, button_text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_color, text_thickness)
 
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     face_results = face_detection.process(rgb_frame)
@@ -101,7 +116,7 @@ while cap.isOpened():
             cv2.putText(frame, f'Fingers Count: {fingers_count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
             # Check if index finger is up and overlaps with button
-            if is_index_finger_up_and_button_pressed(hand_landmarks, (button_x, button_y, button_w, button_h)):
+            if is_index_finger_up_and_button_pressed(hand_landmarks, (button_x, button_y, button_w, button_h), frame_height, frame_width):
                 cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_pressed_color, -1)
                 cv2.putText(frame, "Clicked!", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 # Output the value "ILOVEYOU"
