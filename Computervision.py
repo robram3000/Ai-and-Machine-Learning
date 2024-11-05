@@ -115,13 +115,15 @@ while cap.isOpened():
             fingers_count = count_fingers(hand_landmarks)
             cv2.putText(frame, f'Fingers Count: {fingers_count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
-            # Check if index finger is up and overlaps with button
-            if is_index_finger_up_and_button_pressed(hand_landmarks, (button_x, button_y, button_w, button_h), frame_height, frame_width):
-                cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_pressed_color, -1)
-                cv2.putText(frame, "Clicked!", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                # Output the value "ILOVEYOU"
-                cv2.putText(frame, "ILOVEYOU", (frame_width // 2 - 50, frame_height // 2), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3)
-                print("ILOVEYOU")
+                if is_index_finger_up_and_button_pressed(hand_landmarks, (button_x, button_y, button_w, button_h), frame_height, frame_width):
+                    cv2.rectangle(frame, (button_x, button_y), (button_x + button_w, button_y + button_h), button_pressed_color, -1)
+                    cv2.putText(frame, "Clicked!", (button_x + 10, button_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    
+                    # Output the value "ILOVEYOU" below the button
+                    iloveyou_text_y = button_y + button_h + 30  # Positioning below the button
+                    cv2.putText(frame, "ILOVEYOU", (button_x + 10, iloveyou_text_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                    print("ILOVEYOU")
+
                 
     cv2.imshow("Face and Palm Detection with Button", frame)
 
