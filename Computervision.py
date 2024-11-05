@@ -92,7 +92,6 @@ while cap.isOpened():
                     cv2.line(frame, (x1, y2), (wrist_x, wrist_y), (0, 255, 0), 2)
                     cv2.line(frame, (x2, y2), (wrist_x, wrist_y), (0, 255, 0), 2)
 
-    # Count and display fingers
     if hand_results.multi_hand_landmarks:
         for hand_landmarks in hand_results.multi_hand_landmarks:
             mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
